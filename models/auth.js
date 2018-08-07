@@ -10,6 +10,7 @@ var Auth={
     addUser:(user,callback)=>{
         bcrypt.hash(user.password, saltRounds, function(err, hash) {
             // Store hash in your password DB.
+            console.log("hash",hash)
             return db.query("insert into users (name,email,password) values (?,?,?)",[user.name,user.email,hash],callback)
           });
     },

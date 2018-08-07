@@ -4,7 +4,7 @@ var fromDB = require("../models/donor");
 const jwt = require("jsonwebtoken");
 
 
-routes.get("/list",verifyToken, (req, res, next) => {
+routes.get("/list", verifyToken, (req, res, next) => {
   fromDB.getDonors((error, rows) => {
     if (error) {
       res.status(404);
@@ -15,7 +15,8 @@ routes.get("/list",verifyToken, (req, res, next) => {
     }
   });
 });
-routes.post("/add",verifyToken, (req, res, next) => {
+routes.post("/add", verifyToken, (req, res, next) => {
+  console.log("donor",req.body)
   fromDB.addDonors(req.body, (error, rows) => {
     if (error) {
       res.status(400);
@@ -29,22 +30,31 @@ routes.post("/add",verifyToken, (req, res, next) => {
   });
 });
 function verifyToken(req, res, next) {
-    // Get auth header value
-    const bearerHeader = req.headers['authorization'];
-    // Check if bearer is undefined
-    if(typeof bearerHeader !== 'undefined') {
-      // Split at the space
+  // Get auth header value
+  const bearerHeader = req.headers['authorization'];
+  // Check if bearer is undefined
+  if (typeof bearerHeader !== 'undefined') {
+    // Split at the space
     //   const bearer = bearerHeader.split(' ');
-      // Get token from array
+    // Get token from array
     //   const bearerToken = bearer[1];
-      // Set the token
-      req.token = bearerHeader;
-      // Next middleware
-      next();
-    } else {
-      // Forbidden
-      res.status(403);
-      res.json({status:"unauthorize",body:"bad request"})
-    }
+    // Set the token
+    req.token = bearerHeader;
+    // Next middleware
+    jwt.verify(req.token, "secretkey", (err, decoded) => {
+      if (err) {
+        res.status(403);
+        res.json({ status: "unauthorize", body: "bad request" })
+      }
+      else {
+        next();
+      }
+    })
+
+  } else {
+    // Forbidden
+    res.status(403);
+    res.json({ status: "unauthorize", body: "bad request" })
+  }
 }
 module.exports = routes;
